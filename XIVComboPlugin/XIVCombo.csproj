@@ -25,29 +25,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dalamud">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
+      <HintPath>F:\Dalamud.Updater\6.3.0.8\Dalamud.dll</HintPath>
     </Reference>
     <Reference Include="ImGui.NET">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
+      <HintPath>F:\Dalamud.Updater\6.3.0.8\ImGui.NET.dll</HintPath>
     </Reference>
     <Reference Include="ImGuiScene">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
+      <HintPath>F:\Dalamud.Updater\6.3.0.8\ImGuiScene.dll</HintPath>
     </Reference>
     <Reference Include="Lumina">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
+      <HintPath>F:\Dalamud.Updater\6.3.0.8\Lumina.dll</HintPath>
     </Reference>
     <Reference Include="Lumina.Excel">
-      <Private>false</Private>
-      <HintPath>$(APPDATA)\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
+      <HintPath>F:\Dalamud.Updater\6.3.0.8\Lumina.Excel.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

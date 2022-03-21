@@ -61,50 +61,50 @@ namespace XIVComboPlugin
 
         private string ClassJobToName(byte key)
         {
-            switch (key)
+            return key switch
             {
-                default: return "Unknown";
-                case 1: return "Gladiator";
-                case 2: return "Pugilist";
-                case 3: return "Marauder";
-                case 4: return "Lancer";
-                case 5: return "Archer";
-                case 6: return "Conjurer";
-                case 7: return "Thaumaturge";
-                case 8: return "Carpenter";
-                case 9: return "Blacksmith";
-                case 10: return "Armorer";
-                case 11: return "Goldsmith";
-                case 12: return "Leatherworker";
-                case 13: return "Weaver";
-                case 14: return "Alchemist";
-                case 15: return "Culinarian";
-                case 16: return "Miner";
-                case 17: return "Botanist";
-                case 18: return "Fisher";
-                case 19: return "Paladin";
-                case 20: return "Monk";
-                case 21: return "Warrior";
-                case 22: return "Dragoon";
-                case 23: return "Bard";
-                case 24: return "White Mage";
-                case 25: return "Black Mage";
-                case 26: return "Arcanist";
-                case 27: return "Summoner";
-                case 28: return "Scholar";
-                case 29: return "Rogue";
-                case 30: return "Ninja";
-                case 31: return "Machinist";
-                case 32: return "Dark Knight";
-                case 33: return "Astrologian";
-                case 34: return "Samurai";
-                case 35: return "Red Mage";
-                case 36: return "Blue Mage";
-                case 37: return "Gunbreaker";
-                case 38: return "Dancer";
-                case 39: return "Reaper";
-                case 40: return "Sage";
-            }
+                1 => "Gladiator",
+                2 => "Pugilist",
+                3 => "Marauder",
+                4 => "Lancer",
+                5 => "Archer",
+                6 => "Conjurer",
+                7 => "Thaumaturge",
+                8 => "Carpenter",
+                9 => "Blacksmith",
+                10 => "Armorer",
+                11 => "Goldsmith",
+                12 => "Leatherworker",
+                13 => "Weaver",
+                14 => "Alchemist",
+                15 => "Culinarian",
+                16 => "Miner",
+                17 => "Botanist",
+                18 => "Fisher",
+                19 => "Paladin",
+                20 => "Monk",
+                21 => "Warrior",
+                22 => "Dragoon",
+                23 => "Bard",
+                24 => "White Mage",
+                25 => "Black Mage",
+                26 => "Arcanist",
+                27 => "Summoner",
+                28 => "Scholar",
+                29 => "Rogue",
+                30 => "Ninja",
+                31 => "Machinist",
+                32 => "Dark Knight",
+                33 => "Astrologian",
+                34 => "Samurai",
+                35 => "Red Mage",
+                36 => "Blue Mage",
+                37 => "Gunbreaker",
+                38 => "Dancer",
+                39 => "Reaper",
+                40 => "Sage",
+                _ => "Unknown",
+            };
         }
 
         private void UpdateConfig()
@@ -156,24 +156,28 @@ namespace XIVComboPlugin
                             ImGui.PushItemWidth(200);
                             ImGui.Checkbox(flagInfo.FancyName, ref flagsSelected[j]);
                             ImGui.PopItemWidth();
-                            ImGui.TextColored(new Vector4(0.68f, 0.68f, 0.68f, 1.0f), $"#{j+1}:" + flagInfo.Description);
+                            ImGui.TextColored(new Vector4(0.68f, 0.68f, 0.68f, 1.0f), $"#{j + 1}:" + flagInfo.Description);
                             ImGui.Spacing();
                         }
-                        
+
                     }
-                    
+
                 }
             }
 
             for (var i = 0; i < orderedByClassJob.Length; i++)
             {
+                var left = orderedByClassJob[i].GetAttribute<CustomComboInfoAttribute>().Left;
                 if (flagsSelected[i])
                 {
-                    Configuration.ComboPresets |= orderedByClassJob[i];
+                    Configuration.ComboPresets[left] |= orderedByClassJob[i];
+                    Dalamud.Logging.PluginLog.Information("enabled {0}", orderedByClassJob[i].ToString());
                 }
                 else
                 {
-                    Configuration.ComboPresets &= ~orderedByClassJob[i];
+                    Configuration.ComboPresets[left] &= ~orderedByClassJob[i];
+                    if (orderedByClassJob[i] == CustomComboPreset.WarriorBloodwhettingCombo)
+                        Dalamud.Logging.PluginLog.Information("disabled {0}", orderedByClassJob[i].ToString());
                 }
             }
 
@@ -203,95 +207,12 @@ namespace XIVComboPlugin
             this.iconReplacer.Dispose();
 
             CommandManager.RemoveHandler("/pcombo");
-
-            PluginInterface.Dispose();
         }
 
         private void OnCommandDebugCombo(string command, string arguments)
         {
-            var argumentsParts = arguments.Split();
-
-            switch (argumentsParts[0])
-            {
-                case "setall":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>())
-                        {
-                            if (value == CustomComboPreset.None)
-                                continue;
-
-                            this.Configuration.ComboPresets |= value;
-                        }
-
-                        ChatGui.Print("all SET");
-                    }
-                    break;
-                case "unsetall":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>())
-                        {
-                            this.Configuration.ComboPresets &= value;
-                        }
-
-                        ChatGui.Print("all UNSET");
-                    }
-                    break;
-                case "set":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>())
-                        {
-                            if (value.ToString().ToLower() != argumentsParts[1].ToLower())
-                                continue;
-
-                            this.Configuration.ComboPresets |= value;
-                        }
-                    }
-                    break;
-                case "toggle":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>())
-                        {
-                            if (value.ToString().ToLower() != argumentsParts[1].ToLower())
-                                continue;
-
-                            this.Configuration.ComboPresets ^= value;
-                        }
-                    }
-                    break;
-
-                case "unset":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>())
-                        {
-                            if (value.ToString().ToLower() != argumentsParts[1].ToLower())
-                                continue;
-
-                            this.Configuration.ComboPresets &= ~value;
-                        }
-                    }
-                    break;
-
-                case "list":
-                    {
-                        foreach (var value in Enum.GetValues(typeof(CustomComboPreset)).Cast<CustomComboPreset>().Where(x => x != CustomComboPreset.None))
-                        {
-                            if (argumentsParts[1].ToLower() == "set")
-                            {
-                                if (this.Configuration.ComboPresets.HasFlag(value))
-                                    ChatGui.Print(value.ToString());
-                            }
-                            else if (argumentsParts[1].ToLower() == "all")
-                                ChatGui.Print(value.ToString());
-                        }
-                    }
-                    break;
-
-                default:
-                    this.isImguiComboSetupOpen = true;
-                    break;
-            }
-
-            PluginInterface.SavePluginConfig(this.Configuration);
+            isImguiComboSetupOpen = true;
+            PluginInterface.SavePluginConfig(Configuration);
         }
     }
 }

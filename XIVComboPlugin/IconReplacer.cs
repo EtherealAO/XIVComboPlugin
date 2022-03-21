@@ -91,7 +91,7 @@ namespace XIVComboPlugin
             var comboTime = Marshal.PtrToStructure<float>(comboTimer);
             var level = clientState.LocalPlayer.Level;
 
-            // DRAGOON
+            #region DRAGOON
 
             // Change Jump/High Jump into Mirage Dive when Dive Ready
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.DragoonJumpFeature))
@@ -113,7 +113,7 @@ namespace XIVComboPlugin
                         if (lastMove == DRG.SonicThrust && level >= 72)
                             return DRG.CTorment;
                     }
-                    
+
                     return iconHook.Original(self, DRG.DoomSpike);
                 }
 
@@ -168,8 +168,8 @@ namespace XIVComboPlugin
 
                     return DRG.TrueThrust;
                 }
-
-            // DARK KNIGHT
+            #endregion
+            #region DARK KNIGHT
 
             // Replace Souleater with Souleater combo chain
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.DarkSouleaterCombo))
@@ -263,8 +263,8 @@ namespace XIVComboPlugin
 
                     return PLD.Requiescat;
                 }
-
-            // WARRIOR
+            #endregion
+            #region WARRIOR
 
             // Replace Storm's Path with Storm's Path combo
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.WarriorStormsPathCombo))
@@ -296,9 +296,9 @@ namespace XIVComboPlugin
                     return WAR.HeavySwing;
                 }
 
-            // Replace Mythril Tempest with Mythril Tempest combo
+            // 替换超压斧为AOE循环
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.WarriorMythrilTempestCombo))
-                if (actionID == WAR.MythrilTempest)
+                if (actionID == WAR.Overpower)
                 {
                     if (comboTime > 0)
                         if (lastMove == WAR.Overpower && level >= 40)
@@ -314,7 +314,41 @@ namespace XIVComboPlugin
                     return iconHook.Original(self, actionID);
                 }
 
-            // SAMURAI
+            //
+            if (Configuration.ComboPresets.HasFlag(CustomComboPreset.WarriorBloodwhettingCombo))
+                if (actionID == WAR.Bloodwhetting || actionID == WAR.RawIntuition)
+                {
+                    //先判定Buff
+                    if (SearchBuffArray(735) || //原初的直觉
+                        SearchBuffArray(1857) || SearchBuffArray(2061) || SearchBuffArray(2227) ||//原初的勇猛
+                        SearchBuffArray(2678) //原初的血气
+                        )
+                    {
+                        //再判定地毁人亡和混沌旋风
+                        if (XIVComboPlugin.JobGauges.Get<WARGauge>().BeastGauge >= 50)
+                        {
+                            //混沌旋风
+                            if (SearchBuffArray(1897) || SearchBuffArray(1992)) //原初的混沌
+                            {
+                                return WAR.ChaoticCyclone;
+                            }
+                            else
+                            {
+                                if (level >= 60)
+                                    return WAR.Decimate;
+                                else
+                                    return WAR.SteelCyclone;
+                            }
+                        }
+                        else
+                        {
+                            if (comboTime > 0 && level >= 40 && lastMove == WAR.Overpower)
+                                return WAR.MythrilTempest;
+                        }
+                    }
+                }
+            #endregion
+            #region SAMURAI
 
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.SamuraiTsubameCombo))
                 if (actionID == SAM.Iaijutsu)
@@ -405,11 +439,11 @@ namespace XIVComboPlugin
                         return SAM.OgiNamikiri;
                     if (XIVComboPlugin.JobGauges.Get<SAMGauge>().Kaeshi == Kaeshi.NAMIKIRI)
                         return SAM.KaeshiNamikiri;
-                        
+
                     return SAM.Ikishoten;
                 }
-
-            // NINJA
+            #endregion
+            #region NINJA
 
             // Replace Bunshin with Phantom Kamiatachi
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.NinjaBunshinCombo))
@@ -462,8 +496,8 @@ namespace XIVComboPlugin
                     }
                     return NIN.DeathBlossom;
                 }
-
-            // GUNBREAKER
+            #endregion
+            #region GUNBREAKER
 
             // Replace Solid Barrel with Solid Barrel combo
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.GunbreakerSolidBarrelCombo))
@@ -516,8 +550,8 @@ namespace XIVComboPlugin
                             return GNB.DemonSlaughter;
                     return GNB.DemonSlice;
                 }
-
-            // MACHINIST
+            #endregion
+            #region MACHINIST
 
             // Replace Clean Shot with Heated Clean Shot combo
             // Or with Heat Blast when overheated.
@@ -570,8 +604,8 @@ namespace XIVComboPlugin
                         return MCH.Scattergun;
                     return MCH.SpreadShot;
                 }
-
-            // BLACK MAGE
+            #endregion
+            #region BLACK MAGE
 
             // B4 and F4 change to each other depending on stance, as do Flare and Freeze.
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.BlackEnochianFeature))
@@ -615,8 +649,8 @@ namespace XIVComboPlugin
                         return BLM.BTL;
                     return BLM.LeyLines;
                 }
-
-            // ASTROLOGIAN
+            #endregion
+            #region ASTROLOGIAN
 
             // Make cards on the same button as play
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.AstrologianCardsOnDrawFeature))
@@ -653,8 +687,9 @@ namespace XIVComboPlugin
                     }
                     return iconHook.Original(self, AST.CrownPlay);
                 }
+            #endregion
 
-            // SUMMONER
+            #region SUMMONER
             // Change Fester into Energy Drain
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.SummonerEDFesterCombo))
                 if (actionID == SMN.Fester)
@@ -672,8 +707,8 @@ namespace XIVComboPlugin
                         return SMN.EnergySyphon;
                     return SMN.Painflare;
                 }
-
-            // SCHOLAR
+            #endregion
+            #region SCHOLAR
 
             // Change Fey Blessing into Consolation when Seraph is out.
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.ScholarSeraphConsolationFeature))
@@ -690,8 +725,8 @@ namespace XIVComboPlugin
                     if (XIVComboPlugin.JobGauges.Get<SCHGauge>().Aetherflow == 0) return SCH.Aetherflow;
                     return SCH.EnergyDrain;
                 }
-
-            // DANCER
+            #endregion
+            #region DANCER
 
             // AoE GCDs are split into two buttons, because priority matters
             // differently in different single-target moments. Thanks yoship.
@@ -751,8 +786,8 @@ namespace XIVComboPlugin
                     return DNC.Devilment;
                 }
             }
-
-            // WHM
+            #endregion
+            #region WHM
 
             // Replace Solace with Misery when full blood lily
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.WhiteMageSolaceMiseryFeature))
@@ -771,8 +806,8 @@ namespace XIVComboPlugin
                         return WHM.Misery;
                     return WHM.Rapture;
                 }
-
-            // BARD
+            #endregion
+            #region BARD
 
             // Replace Wanderer's Minuet with PP when in WM.
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.BardWandererPPFeature))
@@ -807,11 +842,11 @@ namespace XIVComboPlugin
 
                     return iconHook.Original(self, BRD.QuickNock);
                 }
-
-            // MONK
+            #endregion
+            #region MONK
             // haha you get nothing now
-
-            // RED MAGE
+            #endregion
+            #region RED MAGE
 
             // Replace Veraero/thunder 2 with Impact when Dualcast is active
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.RedMageAoECombo))
@@ -882,8 +917,8 @@ namespace XIVComboPlugin
                     return RDM.Jolt2;
                 }
             }
-
-            // REAPER 
+            #endregion
+            #region REAPER
 
             if (Configuration.ComboPresets.HasFlag(CustomComboPreset.ReaperSliceCombo))
             {
@@ -914,6 +949,7 @@ namespace XIVComboPlugin
                     return RPR.SpinningScythe;
                 }
             }
+            #endregion
 
             return iconHook.Original(self, actionID);
         }
@@ -925,6 +961,6 @@ namespace XIVComboPlugin
                 if (buffs[i].StatusId == needle)
                     return true;
             return false;
-        }        
+        }
     }
 }
